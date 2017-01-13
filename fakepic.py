@@ -1,9 +1,11 @@
-from config import C_KEY, C_SECRET, A_TOKEN, A_TOKEN_SECRET
+from config import C_KEY, C_SECRET, A_TOKEN, A_TOKEN_SECRET, USE_VIRTUAL_DISPLAY
+from pyvirtualdisplay import Display
 from selenium import webdriver
 import tweepy
 from wand.image import Image
 import os
 import re
+
 
 class FakeSenatePic:
 
@@ -36,6 +38,10 @@ class FakeSenatePic:
         outfile = 'output/%s/screenshot.png' %self.tweet_id
         if not os.path.isfile('output/%s/screenshot.png' %self.tweet_id):
             print("    fakepic: screenshotting tweet")
+
+            if USE_VIRTUAL_DISPLAY:
+                display = Display(visible=0, size=(800, 600))
+                display.start()
 
             driver = webdriver.Firefox()
             driver.get(self.tweet_url)
