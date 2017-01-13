@@ -16,6 +16,12 @@ class FakeSenatePic:
         self.outfile = 'output/%s/final.png' % self.tweet_id
 
     def make_fake_pic(self):
+
+        try:
+            os.mkdir('output')
+        except FileExistsError:
+            pass
+
         try:
             os.mkdir('output/%s' %self.tweet_id)
         except FileExistsError:
