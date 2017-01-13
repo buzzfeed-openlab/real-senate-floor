@@ -95,4 +95,3 @@ if __name__ == '__main__':
 
     fake_pic = FakeSenatePic(a_good_tweet)
     fake_pic.make_fake_pic()
-    fake_pic.cleanup()

@@ -3,3 +3,5 @@ C_KEY = ""
 C_SECRET = ""
 A_TOKEN = ""
 A_TOKEN_SECRET = ""
+
+USE_VIRTUAL_DISPLAY = False # set this to true if using ubuntu
