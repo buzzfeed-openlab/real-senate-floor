@@ -4,6 +4,7 @@
 
 **1. Install OS level dependencies**
 - Python 3
+- geckodriver (latest release [here](https://github.com/mozilla/geckodriver/releases))
 
 **2. Clone this repo**
 ```
