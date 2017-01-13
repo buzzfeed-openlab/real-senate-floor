@@ -5,6 +5,7 @@
 **1. Install OS level dependencies**
 - Python 3
 - geckodriver (latest release [here](https://github.com/mozilla/geckodriver/releases))
+- xvfb (only required if using ubuntu, `sudo apt-get install xvfb`)
 
 **2. Clone this repo**
 ```

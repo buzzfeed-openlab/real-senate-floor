@@ -6,6 +6,9 @@ from wand.image import Image
 import os
 import re
 
+auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
+auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
+api = tweepy.API(auth)
 
 class FakeSenatePic:
 
@@ -16,6 +19,7 @@ class FakeSenatePic:
         self.tweet_url = tweet_url
         self.tweet_id = tweet_url.split('/')[-1].split('?')[0]
         self.outfile = 'output/%s/final.png' % self.tweet_id
+        self.tweet_obj = api.get_status(self.tweet_id)
 
     def make_fake_pic(self):
 
@@ -50,13 +54,34 @@ class FakeSenatePic:
 
     def _crop_tweet(self):
         outfile = 'output/%s/tweet_cropped.png' %self.tweet_id
+
+        tweet_height = self._get_tweet_height()
+
         if not os.path.isfile(outfile):
             print("    fakepic: cropping image of tweet")
             with Image(filename='output/%s/screenshot.png' %self.tweet_id) as img:
                 # TODO: smart cropping
                 # make sure it works for tweets of various lengths, replies, photos
-                img.crop(350, 70, width=580, height=300)
+                img.crop(350, 70, width=580, height=tweet_height)
                 img.save(filename=outfile)
+
+    def _get_tweet_height(self):
+        # approximating how the tweet should be cropped based on contents
+        tweet_text_len = len(self.tweet_obj.text)
+
+        # logic for height here
+        if tweet_text_len < 50:
+            height = 250
+        elif tweet_text_len < 100:
+            height = 275
+        else:
+            height = 300
+
+        # give more space if there are links (assuming rich snippets)
+        if self.tweet_obj.entities.get('urls', None):
+            height += 140
+
+        return height
 
     def _compose_image(self):
 
@@ -64,14 +89,19 @@ class FakeSenatePic:
         if not os.path.isfile(FakeSenatePic.senate_pic_canvas):
             self._make_canvas()
 
-        # if not os.path.isfile(outfile):
-        print("    fakepic: adding tweet to poster")
-        with Image(filename=FakeSenatePic.senate_pic_canvas) as senate_floor_img:
-            with Image(filename='output/%s/tweet_cropped.png' %self.tweet_id) as tweet_img:
-                tweet_img.resize(320,170)
-                tweet_img.rotate(2)
-                senate_floor_img.composite(tweet_img, left=660, top=150)
-                senate_floor_img.save(filename=self.outfile)
+        if not os.path.isfile(self.outfile):
+            print("    fakepic: adding tweet to poster")
+            with Image(filename=FakeSenatePic.senate_pic_canvas) as senate_floor_img:
+                with Image(filename='output/%s/tweet_cropped.png' %self.tweet_id) as tweet_img:
+                    cropped_height = tweet_img.height
+                    print(cropped_height)
+                    tweet_img.resize(int(tweet_img.width*.55),int(tweet_img.height*.55))
+                    tweet_img.rotate(2)
+                    if cropped_height > 300: # position diff if there is media & tweet is tall
+                        senate_floor_img.composite(tweet_img, left=660, top=120)
+                    else:
+                        senate_floor_img.composite(tweet_img, left=660, top=150)
+                    senate_floor_img.save(filename=self.outfile)
 
     def _make_canvas(self):
         with Image(filename=FakeSenatePic.senate_pic_original) as senate_floor_img:
