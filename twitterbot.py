@@ -25,7 +25,7 @@ def handle_tweets():
         print("mention: %s" % mention.text)
         poster_tweet_sn = mention.in_reply_to_screen_name
         poster_tweet_id = mention.in_reply_to_status_id_str
-        has_trigger_phrase = 'bern this' in mention.text
+        has_trigger_phrase = 'cc @realsenatefloor' in mention.text.lower() or 'cc: @realsenatefloor' in mention.text.lower()
 
         # if this tweet is a reply and has trigger phrase
         if poster_tweet_sn and poster_tweet_id and has_trigger_phrase:
