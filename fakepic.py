@@ -44,7 +44,7 @@ class FakeSenatePic:
             print("    fakepic: screenshotting tweet")
 
             if USE_VIRTUAL_DISPLAY:
-                display = Display(visible=0, size=(800, 600))
+                display = Display(visible=0, size=(1920, 600))
                 display.start()
 
             driver = webdriver.Firefox()
