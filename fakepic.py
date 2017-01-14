@@ -10,26 +10,29 @@ auth = tweepy.OAuthHandler(C_KEY, C_SECRET)
 auth.set_access_token(A_TOKEN, A_TOKEN_SECRET)
 api = tweepy.API(auth)
 
+full_path = os.path.realpath(__file__)
+dir_path, f = os.path.split(full_path)
+
 class FakeSenatePic:
 
-    senate_pic_original = 'images/senate_pic_original.jpg'
-    senate_pic_canvas = 'images/senate_pic_canvas.png'
+    senate_pic_original = '%s/images/senate_pic_original.jpg' % dir_path
+    senate_pic_canvas = '%s/images/senate_pic_canvas.png' % dir_path
 
     def __init__(self, tweet_url):
         self.tweet_url = tweet_url
         self.tweet_id = tweet_url.split('/')[-1].split('?')[0]
-        self.outfile = 'output/%s/final.png' % self.tweet_id
+        self.outfile = '%s/output/%s/final.png' % (dir_path, self.tweet_id)
         self.tweet_obj = api.get_status(self.tweet_id)
 
     def make_fake_pic(self):
 
         try:
-            os.mkdir('output')
+            os.mkdir('%s/output' % dir_path)
         except FileExistsError:
             pass
 
         try:
-            os.mkdir('output/%s' %self.tweet_id)
+            os.mkdir('%s/output/%s' % (dir_path, self.tweet_id))
         except FileExistsError:
             pass
 
@@ -39,8 +42,8 @@ class FakeSenatePic:
 
 
     def _screenshot_tweet(self):
-        outfile = 'output/%s/screenshot.png' %self.tweet_id
-        if not os.path.isfile('output/%s/screenshot.png' %self.tweet_id):
+        outfile = '%s/output/%s/screenshot.png' % (dir_path, self.tweet_id)
+        if not os.path.isfile('%s/output/%s/screenshot.png' % (dir_path, self.tweet_id)):
             print("    fakepic: screenshotting tweet")
 
             if USE_VIRTUAL_DISPLAY:
@@ -53,13 +56,13 @@ class FakeSenatePic:
             driver.quit()
 
     def _crop_tweet(self):
-        outfile = 'output/%s/tweet_cropped.png' %self.tweet_id
+        outfile = '%s/output/%s/tweet_cropped.png' % (dir_path, self.tweet_id)
 
         tweet_height = self._get_tweet_height()
 
         if not os.path.isfile(outfile):
             print("    fakepic: cropping image of tweet")
-            with Image(filename='output/%s/screenshot.png' %self.tweet_id) as img:
+            with Image(filename='%s/output/%s/screenshot.png' % (dir_path, self.tweet_id)) as img:
                 # TODO: smart cropping
                 # make sure it works for tweets of various lengths, replies, photos
                 img.crop(350, 70, width=580, height=tweet_height)
@@ -92,9 +95,8 @@ class FakeSenatePic:
         if not os.path.isfile(self.outfile):
             print("    fakepic: adding tweet to poster")
             with Image(filename=FakeSenatePic.senate_pic_canvas) as senate_floor_img:
-                with Image(filename='output/%s/tweet_cropped.png' %self.tweet_id) as tweet_img:
+                with Image(filename='%s/output/%s/tweet_cropped.png' % (dir_path, self.tweet_id)) as tweet_img:
                     cropped_height = tweet_img.height
-                    print(cropped_height)
                     tweet_img.resize(int(tweet_img.width*.55),int(tweet_img.height*.55))
                     tweet_img.rotate(2)
                     if cropped_height > 300: # position diff if there is media & tweet is tall
@@ -105,7 +107,7 @@ class FakeSenatePic:
 
     def _make_canvas(self):
         with Image(filename=FakeSenatePic.senate_pic_original) as senate_floor_img:
-            with Image(filename='images/white.png') as white:
+            with Image(filename='%s/images/white.png' % dir_path) as white:
                 white.rotate(2)
                 white.resize(340, 260)
                 senate_floor_img.composite(white, left=655, top=110)
@@ -113,10 +115,10 @@ class FakeSenatePic:
 
     def cleanup(self):
         # cleanup images
-        os.remove('output/%s/screenshot.png' % self.tweet_id)
-        os.remove('output/%s/tweet_cropped.png' % self.tweet_id)
-        os.remove('output/%s/final.png' % self.tweet_id)
-        os.rmdir('output/%s' % self.tweet_id)
+        os.remove('%s/output/%s/screenshot.png' % (dir_path, self.tweet_id))
+        os.remove('%s/output/%s/tweet_cropped.png' % (dir_path, self.tweet_id))
+        os.remove('%s/output/%s/final.png' % (dir_path, self.tweet_id))
+        os.rmdir('%s/output/%s' % (dir_path, self.tweet_id))
 
 
 if __name__ == '__main__':
